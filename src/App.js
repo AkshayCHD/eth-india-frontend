@@ -3,87 +3,138 @@ import Snake from "./components/Snake/Snake";
 import UserIdDialog from "./components/UserIdDialog/UserIdDialog";
 import axios from "axios";
 import "./App.css";
-// import { createClient } from "urql";
+import { createClient } from "urql";
 
-// const APIURL = "https://api.thegraph.com/subgraphs/name/anubhavitis/ethindia22";
+const APIURL = "https://api.thegraph.com/subgraphs/name/anubhavitis/easygames";
 
-// const transfersQuery = `
-//   query {
-//     transfers(first: 10){
-//       id
-//       tokenId
-//       from
-//     }
-//   }
-// `;
-// const users = [
-//   {
-//     id: 1,
-//     name: "user1",
-//     publicKey: "0xe196C91ABFb4DFba4c57704C530Be52C3c3ddD9B",
-//     level: 1,
-//   },
-//   {
-//     id: 2,
-//     name: "user2",
-//     publicKey: "0xB63Cf430fe1Ca8d80dff1F714B71fD688e8F5F6d",
-//     level: 2,
-//   },
-//   {
-//     id: 3,
-//     name: "user3",
-//     publicKey: "0xb360ffa8E8a35f99bB3392F6F79d9b1116ddF8D8",
-//     level: 1,
-//   },
-// ];
+const transfersQuery = `
+  query {
+    newNfts(first: 20) {
+      id
+      name
+      from
+      to
+    }
+    transferNfts(first: 20) {
+      id
+      from
+      to
+      tokenId
+      name
+    }
+  }
+`;
+const users = [
+  {
+    id: 1,
+    name: "user1",
+    publicKey: "0xe196C91ABFb4DFba4c57704C530Be52C3c3ddD9B",
+    level: 1,
+  },
+  {
+    id: 2,
+    name: "user2",
+    publicKey: "0xB63Cf430fe1Ca8d80dff1F714B71fD688e8F5F6d",
+    level: 2,
+  },
+  {
+    id: 3,
+    name: "user3",
+    publicKey: "0xb360ffa8E8a35f99bB3392F6F79d9b1116ddF8D8",
+    level: 1,
+  },
+];
 
-// const client = createClient({
-//   url: APIURL,
-// });
+const client = createClient({
+  url: APIURL,
+});
 const App = () => {
+  const [snakeColor, setSnakeColor] = useState("#248ec2");
   const [userId, setUserId] = useState();
-  const [snakeArray, setSnakeArray] = useState([1, 2, 3, 4]);
   const [startGame, setStartGame] = useState(false);
   const [slowSpeed, setSlowSpeed] = useState(false);
   const [shortSnake, setShortSnake] = useState(false);
-  const [color, setColor] = useState("default");
-  const fetchNftConfig = async (userId) => {
-    // const data = await client.query(transfersQuery).toPromise();
-    // const user = users.find((user) => user.id === parseInt(userId))
-    // console.log(data);
-    const response = await axios.get(
-      `http://localhost:3030/get-user-data?id=${userId}`
-    );
-    const nftConfigs = response.data.userNfts;
-    const speedNft = nftConfigs.find((nft) => nft.name === "speed");
-    // const colorNft = nftConfigs.find((nft) => nft.name === "color");
-    const lengthNft = nftConfigs.find((nft) => nft.name === "length");
 
-    console.log(speedNft);
-    if (speedNft) {
+  const fetchNftConfig = async (userId) => {
+    if(!userId) {
+      return;
+    }
+    const user = users.find((user) => user.id === parseInt(userId));
+    const data = await client.query(transfersQuery).toPromise();
+    console.log(data);
+    const newNfts = data.data.newNfts;
+    const transferList = data.data.transferNfts;
+    let speedCount = 0;
+    let lengthCount = 0;
+    let colorCount = 0;
+
+    newNfts.forEach(newNft => {
+      if(String(newNft.from).toLowerCase() === String(user.publicKey).toLowerCase()) {
+        if(newNft.name === "speed") {
+          speedCount--;
+        } else if(newNft.name === "length") {
+          lengthCount--;
+        } else if(newNft.name === "color") {
+          colorCount--;
+        }
+      } else if(String(newNft.to).toLowerCase() === String(user.publicKey).toLowerCase()) {
+        console.log("123123")
+        if(newNft.name === "speed") {
+          speedCount++;
+        } else if(newNft.name === "length") {
+          lengthCount++;
+        } else if(newNft.name === "color") {
+          colorCount++;
+        }
+      } 
+    })
+    transferList.forEach(transfer => {
+      if(String(transfer.from).toLowerCase() === String(user.publicKey).toLowerCase()) {
+        if(transfer.name === "speed") {
+          speedCount--;
+        } else if(transfer.name === "length") {
+          lengthCount--;
+        } else if(transfer.name === "color") {
+          colorCount--;
+        }
+      } else if(String(transfer.to).toLowerCase() === String(user.publicKey).toLowerCase()) {
+        if(transfer.name === "speed") {
+          speedCount++;
+        } else if(transfer.name === "length") {
+          lengthCount++;
+        } else if(transfer.name === "color") {
+          colorCount++;
+        }
+      }
+    });
+    console.log({ lengthCount, speedCount, colorCount });
+
+    if (speedCount > 0) {
       setSlowSpeed(true);
     }
-    if (lengthNft) {
+    if (lengthCount > 0) {
       setShortSnake(true);
+    }
+    if(colorCount > 0) {
+      setSnakeColor("#FF0000")
     }
     setStartGame(true);
   };
+
   useEffect(() => {
     console.log(userId);
-    // fetchNftConfig(userId);
-
-    setStartGame(true);
+    fetchNftConfig(userId);
   }, [userId]);
+
   console.log(userId);
   return userId ? (
     startGame ? (
       <div className="App">
         <Snake
-          color1="#248ec2"
+          color1={snakeColor}
           color2="#f0cb16"
           backgroundColor="#3F56AF"
           slowSpeed={slowSpeed}
-          color={color}
           shortSnake={shortSnake}
         />
       </div>
