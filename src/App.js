@@ -5,14 +5,22 @@ import axios from "axios";
 import "./App.css";
 import { createClient } from "urql";
 
-const APIURL = "https://api.thegraph.com/subgraphs/name/anubhavitis/ethindia22";
+const APIURL = "https://api.thegraph.com/subgraphs/name/anubhavitis/easygames";
 
 const transfersQuery = `
   query {
-    transfers(first: 10){
+    newNfts(first: 20) {
       id
-      tokenId
+      name
       from
+      to
+    }
+    transferNfts(first: 20) {
+      id
+      from
+      to
+      tokenId
+      name
     }
   }
 `;
@@ -42,28 +50,72 @@ const client = createClient({
 });
 const App = () => {
   const [userId, setUserId] = useState();
-  const [snakeArray, setSnakeArray] = useState([1, 2, 3, 4]);
   const [startGame, setStartGame] = useState(false);
   const [slowSpeed, setSlowSpeed] = useState(false);
   const [shortSnake, setShortSnake] = useState(false);
-  const [color, setColor] = useState("default");
-  const fetchNftConfig = async (userId) => {
-    const data = await client.query(transfersQuery).toPromise();
-    const user = users.find((user) => user.id === parseInt(userId))
-    console.log(data);
-    const response = await axios.get(
-      `http://localhost:3030/get-user-data?id=${userId}`
-    );
-    const nftConfigs = response.data.userNfts;
-    const speedNft = nftConfigs.find((nft) => nft.name === "speed");
-    // const colorNft = nftConfigs.find((nft) => nft.name === "color");
-    const lengthNft = nftConfigs.find((nft) => nft.name === "length");
 
-    console.log(speedNft);
-    if (speedNft) {
+  const fetchNftConfig = async (userId) => {
+    if(!userId) {
+      return;
+    }
+    const user = users.find((user) => user.id === parseInt(userId));
+    const data = await client.query(transfersQuery).toPromise();
+    console.log(data);
+    const newNfts = data.data.newNfts;
+    const transferList = data.data.transferNfts;
+    let speedCount = 0;
+    let lengthCount = 0;
+    let colorCount = 0;
+
+    newNfts.forEach(newNft => {
+      console.log(newNft.to)
+      console.log(user.publicKey)
+      console.log(String(newNft.to).toLowerCase() === String(user.publicKey).toLowerCase())
+
+      if(String(newNft.from).toLowerCase() === String(user.publicKey).toLowerCase()) {
+        if(newNft.name === "speed") {
+          speedCount--;
+        } else if(newNft.name === "length") {
+          lengthCount--;
+        } else if(newNft.color === "color") {
+          colorCount--;
+        }
+      } else if(String(newNft.to).toLowerCase() === String(user.publicKey).toLowerCase()) {
+        console.log("123123")
+        if(newNft.name === "speed") {
+          speedCount++;
+        } else if(newNft.name === "length") {
+          lengthCount++;
+        } else if(newNft.color === "color") {
+          colorCount++;
+        }
+      } 
+    })
+    transferList.forEach(transfer => {
+      if(String(transfer.from).toLowerCase() === String(user.publicKey).toLowerCase()) {
+        if(transfer.name === "speed") {
+          speedCount--;
+        } else if(transfer.name === "length") {
+          lengthCount--;
+        } else if(transfer.color === "color") {
+          colorCount--;
+        }
+      } else if(String(transfer.to).toLowerCase() === String(user.publicKey).toLowerCase()) {
+        if(transfer.name === "speed") {
+          speedCount++;
+        } else if(transfer.name === "length") {
+          lengthCount++;
+        } else if(transfer.color === "color") {
+          colorCount++;
+        }
+      }
+    });
+    console.log({ lengthCount, speedCount, colorCount });
+
+    if (speedCount > 0) {
       setSlowSpeed(true);
     }
-    if (lengthNft) {
+    if (lengthCount > 0) {
       setShortSnake(true);
     }
     setStartGame(true);
@@ -81,7 +133,6 @@ const App = () => {
           color2="#1d355e"
           backgroundColor="#ebebeb"
           slowSpeed={slowSpeed}
-          color={color}
           shortSnake={shortSnake}
         />
       </div>

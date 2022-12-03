@@ -3,7 +3,6 @@ import axios from 'axios';
 import './Snake.css';
 
 const Snake = (props) => {
-    console.log("Snake reloaded")
     let part = [4, 3, 2, 1];
     let speed = 50;
     if(props.shortSnake) {
