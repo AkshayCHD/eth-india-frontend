@@ -1,22 +1,33 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import axios from 'axios';
 import './Snake.css';
 
 const Snake = (props) => {
+    console.log("Snake reloaded")
+    let part = [4, 3, 2, 1];
+    let speed = 50;
+    if(props.shortSnake) {
+        part = [1];
+    }
+    if(props.slowSpeed) {
+        speed = 250;
+    }
     const [dim, setDim] = useState(0);
     const [chunk, setChunk] = useState(0);
     const [direction, setDirection] = useState('right');
     const [fruit, setFruit] = useState(26);
     const [points, setPoints] = useState(0);
     const [game, setGame] = useState(false);
-    const speedRef = useRef(100);
+    const speedRef = useRef(speed);
     let width;
+    
+
     const [snake, setSnake] = useState([
         {
             direction: 'right', 
-            part: [186, 185, 184, 183]
+            part: part
         }
     ]);
-
     const reset = () => {
         speedRef.current = 100;
         setPoints(0)
@@ -218,6 +229,7 @@ const Snake = (props) => {
                 document.removeEventListener('keydown', handleKeydown)
             };
         }
+        console.log(snake)
     }, [turn, width, dim, chunk, snake, direction, points, fruit, game])
 
     return (
