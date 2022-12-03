@@ -1,7 +1,62 @@
 @import url('https://fonts.googleapis.com/css2?family=East+Sea+Dokdo&display=swap');
 
-body {
+/* body {
     padding: 20px ;
     font-family: 'East Sea Dokdo', cursive;
     font-size: 40px;
+} */
+
+
+.landingPage {
+	background-color: #1f2150;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.form {
+	position: absolute;
+	left: 57%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.form > h3 {
+	font-size: 30px;
+	color: white;
+	/* padding-left: 0.5rem; */
+	margin-bottom: 18px;
+}
+
+input {
+	height: 60px;
+	width: 525px;
+	border-radius: 1rem;
+	padding-bottom: 0;
+	margin: 0;
+}
+input::placeholder {
+	font-size: 20px;
+	padding-left: 1rem;
+	/* padding: 1rem; */
+}
+input[type="text" i] {
+	padding: 0;
+}
+
+button {
+	background-color: #0000ff;
+	border: none;
+	padding: 1rem 2rem;
+	font-size: 20px;
+	margin-top: 3rem;
+	color: white;
+	border-radius: 0.5rem;
+	margin-top: 28px;
+	font-weight: bold;
+}
+.arrow {
+	margin-left: 8px;
 }
