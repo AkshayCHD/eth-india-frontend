@@ -245,7 +245,7 @@ const Snake = (props) => {
                                 style={piece === 'bang' ? 
                                         {width: chunk, height: chunk, backgroundColor: props.color1} : 
                                             piece === 'fruit' ?
-                                                {width: chunk, height: chunk, backgroundColor: props.color2} :
+                                                {width: chunk, height: chunk, backgroundColor: props.color2, borderRadius:"2rem"} :
                                                     {width: chunk, height: chunk}}
                                 >
                             </div>
